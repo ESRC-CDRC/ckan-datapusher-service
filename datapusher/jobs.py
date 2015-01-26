@@ -246,7 +246,15 @@ def validate_input(input):
         raise util.JobError('No CKAN API key provided')
 
 
-@job.async
+def resource_conflict(job1, job2):
+    """ Jobs operate on the same resource should be sequentially run."""
+    if job1['resource_id'] == job2['resource_id']:
+        return True
+    else:
+        return False
+
+
+@job.async(check_conflict=resource_conflict)
 def push_to_datastore(task_id, input, dry_run=False):
     '''Download and parse a resource push its data into CKAN's DataStore.
 
