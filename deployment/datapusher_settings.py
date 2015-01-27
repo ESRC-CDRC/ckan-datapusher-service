@@ -1,4 +1,5 @@
 import uuid
+import os
 
 DEBUG = False
 TESTING = False
@@ -10,7 +11,10 @@ NAME = 'datapusher'
 
 # database
 
-SQLALCHEMY_DATABASE_URI = 'postgresql://localhost/datapusher'
+SQLALCHEMY_DATABASE_URI = 'postgresql://%s@localhost/%s' % (
+    os.environ['CKAN_DATAPUSHER'],
+    os.environ['CKAN_DATAPUSHER_DB'],
+)
 
 # webserver host and port
 
