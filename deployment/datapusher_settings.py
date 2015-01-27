@@ -11,8 +11,10 @@ NAME = 'datapusher'
 
 # database
 
-SQLALCHEMY_DATABASE_URI = 'postgresql://%s@localhost/%s' % (
+SQLALCHEMY_DATABASE_URI = 'postgresql://%s:%s@%s/%s' % (
     os.environ['CKAN_DATAPUSHER'],
+    os.environ['CKAN_DATAPUSHER_PASS'],
+    os.environ['DB_PORT_5432_TCP_ADDR'],
     os.environ['CKAN_DATAPUSHER_DB'],
 )
 
