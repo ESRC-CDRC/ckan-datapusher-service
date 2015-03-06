@@ -27,3 +27,6 @@ pip-log.txt
 *.db
 *.sqlite
 *.sqlite3
+
+#All hidden files/dirs
+.*
