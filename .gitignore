@@ -30,3 +30,5 @@ pip-log.txt
 
 #All hidden files/dirs
 .*
+
+.DS_Store
