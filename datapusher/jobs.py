@@ -284,6 +284,7 @@ def push_to_datastore(task_id, input, dry_run=False):
     ckan_url = data['ckan_url']
     resource_id = data['resource_id']
     api_key = input.get('api_key')
+    limit = int(data.get('limit', -1))
 
     try:
         resource = get_resource(resource_id, ckan_url, api_key)
@@ -358,16 +359,21 @@ def push_to_datastore(task_id, input, dry_run=False):
     headers = [header.strip() for header in headers if header.strip()]
     headers_set = set(headers)
 
-    def row_iterator():
+    def row_iterator(limit=-1):
+        count = None if limit < 0 else limit
         for row in row_set:
             data_row = {}
+            if count is not None and count <= 0:
+                return
+            elif count is not None:
+                count -= 1
             for index, cell in enumerate(row):
                 column_name = cell.column.strip()
                 if column_name not in headers_set:
                     continue
                 data_row[column_name] = cell.value
             yield data_row
-    result = row_iterator()
+    result = row_iterator(limit)
 
     '''
     Delete existing datstore resource before proceeding. Otherwise
@@ -387,6 +393,9 @@ def push_to_datastore(task_id, input, dry_run=False):
     if dry_run:
         return headers_dicts, result
 
+    if limit > 0:
+        logger.info('Uploading only the first {limit} entries.'.format(
+            limit=limit))
     count = 0
     for i, records in enumerate(chunky(result, 250)):
         count += len(records)
