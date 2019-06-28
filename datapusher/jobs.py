@@ -15,6 +15,7 @@ import decimal
 import hashlib
 import cStringIO
 import time
+import ssl
 
 import messytables
 from slugify import slugify
@@ -176,7 +177,8 @@ def delete_datastore_resource(resource_id, api_key, ckan_url):
                                  data=json.dumps({'id': resource_id,
                                                   'force': True}),
                                  headers={'Content-Type': 'application/json',
-                                          'Authorization': api_key}
+                                          'Authorization': api_key},
+                                 verify=False
                                  )
         check_response(response, delete_url, 'CKAN',
                        good_status=(201, 200, 404), ignore_no_success=True)
@@ -199,6 +201,7 @@ def send_resource_to_datastore(resource, headers, records, api_key, ckan_url):
                       data=json.dumps(request, cls=DatastoreEncoder),
                       headers={'Content-Type': 'application/json',
                                'Authorization': api_key},
+                      verify=False
                       )
     check_response(r, url, 'CKAN DataStore')
 
@@ -215,7 +218,9 @@ def update_resource(resource, api_key, ckan_url):
         url,
         data=json.dumps(resource),
         headers={'Content-Type': 'application/json',
-                 'Authorization': api_key})
+                 'Authorization': api_key},
+        verify=False
+    )
 
     check_response(r, url, 'CKAN')
 
@@ -228,7 +233,8 @@ def get_resource(resource_id, ckan_url, api_key):
     r = requests.post(url,
                       data=json.dumps({'id': resource_id}),
                       headers={'Content-Type': 'application/json',
-                               'Authorization': api_key}
+                               'Authorization': api_key},
+                      verify=False
                       )
     check_response(r, url, 'CKAN')
 
@@ -303,7 +309,10 @@ def push_to_datastore(task_id, input, dry_run=False):
             # otherwise we won't get file from private resources
             request.add_header('Authorization', api_key)
 
-        response = urllib2.urlopen(request, timeout=DOWNLOAD_TIMEOUT)
+        #response = urllib2.urlopen(request, timeout=DOWNLOAD_TIMEOUT)
+        context = ssl._create_unverified_context()
+        response = urllib2.urlopen(request, timeout=DOWNLOAD_TIMEOUT, context=context)
+
     except urllib2.HTTPError as e:
         raise HTTPError(
             "DataPusher received a bad HTTP response when trying to download "
